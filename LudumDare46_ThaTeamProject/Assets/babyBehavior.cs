@@ -7,50 +7,95 @@ public class babyBehavior : MonoBehaviour
 {
 
     public interactionManager intManager;
+    GameObject target;
+
+    enum BabyState { Idle, Walking, Interacting, Dead };
+
+    BabyState babyState;
 
     void Start()
     {
-        GetComponent<AIDestinationSetter>().target = intManager.interactionPoints[Random.Range(0, intManager.interactionPoints.Length)];
+        target = intManager.interactionPoints[Random.Range(0, intManager.interactionPoints.Length)];
+        GetComponent<AIDestinationSetter>().target = target.transform;
+        babyState = BabyState.Walking;
     }
 
     void Update()
     {
+        //Quand le bébé arrive sur sa target
         //print(Vector3.Distance(GetComponent<AIDestinationSetter>().target.position, transform.position));
         if (GetComponent<AIDestinationSetter>().target != null)
         {
             if (Vector3.Distance(GetComponent<AIDestinationSetter>().target.position, transform.position) < 0.1f)
             {
-                print("target reached");
-                GetComponent<AIDestinationSetter>().target = null;
-                StartCoroutine(ExecuteAfterTime(2f));
+                if (target.GetComponent<InteractionBehavior>().interactionType == InteractionType.Idle ||
+                    target.GetComponent<InteractionBehavior>().interactionType == InteractionType.Clone )
+                {
+                    babyState = BabyState.Idle;
+                }
+                else if (target.GetComponent<InteractionBehavior>().interactionType == InteractionType.Kill ||
+                         target.GetComponent<InteractionBehavior>().interactionType == InteractionType.Fire ||
+                         target.GetComponent<InteractionBehavior>().interactionType == InteractionType.KillFire ||
+                         target.GetComponent<InteractionBehavior>().interactionType == InteractionType.Vent )
+                {
+                    babyState = BabyState.Interacting;
+                }
 
+                //print("target reached");
+                StartCoroutine( ExecuteInteraction( target.GetComponent<InteractionBehavior>().interactionTime ));
+
+                //désactive la target de déplacement
+                GetComponent<AIDestinationSetter>().target = null;
+
+            }
+        }
+
+        if (Input.GetMouseButtonDown(0))
+        {
+            if (GetComponent<PolygonCollider2D>().OverlapPoint(Camera.main.ScreenToWorldPoint(Input.mousePosition)))
+            {
+                if (babyState == BabyState.Interacting)
+                {
+                    print("Arrête ça " + this.name + " !");
+
+                    FindNewTarget();
+                }
+                    
+                    
             }
         }
     }
 
-    IEnumerator ExecuteAfterTime(float time)
+    IEnumerator ExecuteInteraction(float time)
     {
         yield return new WaitForSeconds(time);
 
-        GetComponent<AIDestinationSetter>().target = intManager.interactionPoints[Random.Range(0, intManager.interactionPoints.Length)];
-
-        while (Vector3.Distance(GetComponent<AIDestinationSetter>().target.position, transform.position) < 0.15f)
+        if (babyState == BabyState.Interacting)
         {
-            GetComponent<AIDestinationSetter>().target = intManager.interactionPoints[Random.Range(0, intManager.interactionPoints.Length)];
-            yield return null;
+            Destroy(gameObject);
+            print("interaction " + target.GetComponent<InteractionBehavior>().interactionType + " terminée");
         }
         
+        //si bébé n'est pas déjà reparti en vadrouille (interaction interupt)
+        if (babyState != BabyState.Walking)
+        {
+            FindNewTarget();
+        }
     }
 
-    private IEnumerator Countdown()
+    void FindNewTarget()
     {
-        float duration = 2f;
+        //tirer une nouvelle target random
+        target = intManager.interactionPoints[Random.Range(0, intManager.interactionPoints.Length)];
+        GetComponent<AIDestinationSetter>().target = target.transform;
 
-        float normalizedTime = 0;
-        while (normalizedTime <= 1f)
+        babyState = BabyState.Walking;
+
+        //tirer une target random (autre que celle ou le bébé est déjà)
+        while (Vector3.Distance(GetComponent<AIDestinationSetter>().target.position, transform.position) < 0.15f)
         {
-            normalizedTime += Time.deltaTime / duration;
-            yield return null;
+            target = intManager.interactionPoints[Random.Range(0, intManager.interactionPoints.Length)];
+            GetComponent<AIDestinationSetter>().target = target.transform;
         }
     }
 

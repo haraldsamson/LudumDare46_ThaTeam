@@ -2,9 +2,12 @@
 using System.Collections.Generic;
 using UnityEngine;
 
+public enum InteractionType { Idle, Vent, Kill, Fire, KillFire, Autodestruct, Clone };
+
 public class interactionManager : MonoBehaviour
 {
-    public Transform[] interactionPoints;
+    public GameObject[] interactionPoints;
+
 
     void Start()
     {
