@@ -15,7 +15,15 @@ public class babyBehavior : MonoBehaviour
 
     GameObject currentRoom;
 
-    Vector3 flyingDirection;
+    Transform window;
+    float criticAccDistance = 5f;
+    Vector3 flyDirection;
+    float speed = 0f;
+    float accMin = 3f;
+    float accMax = 15f;
+    float acc;
+    bool isAccelerating = false;
+    bool isInSpace = false;
 
     void Start()
     {
@@ -41,6 +49,8 @@ public class babyBehavior : MonoBehaviour
             }
         }
 
+        print("currentRoom is " + currentRoom);
+
     }
 
     void Update()
@@ -49,11 +59,28 @@ public class babyBehavior : MonoBehaviour
         {
             if (babyState == BabyState.FLying)
             {
-                transform.Translate(flyingDirection * Time.deltaTime * 1.5f, Space.World);
-                transform.Rotate(0, 0, Time.deltaTime * 250f, Space.World);
+                if (isAccelerating)
+                {
+                    acc = accMin + Mathf.Clamp(1 - Vector3.Distance(transform.position, window.position) / criticAccDistance, 0, 1) * (accMax - accMin);
+                    speed += acc * Time.deltaTime;
+                    transform.Translate(flyDirection * Time.deltaTime * speed, Space.World);
+                }
 
-                print(Vector3.Distance(Vector3.zero, transform.position));
-                if (Vector3.Distance(Vector3.zero, transform.position) > 10f)
+                if (Vector3.Distance(transform.position, window.position) < 0.1f && !isInSpace)
+                {
+                    isAccelerating = false;
+                    flyDirection = Quaternion.AngleAxis(Random.Range(-30f, 30f), Vector3.forward) * flyDirection;
+                    isInSpace = true;
+                }
+
+                if (isInSpace)
+                {
+                    transform.Translate(flyDirection * Time.deltaTime * speed, Space.World);
+                    transform.Rotate(0, 0, Time.deltaTime * 250f, Space.World);
+                    currentRoom = null;
+                }
+
+                if (Vector3.Distance(transform.position, Vector3.zero) > 10f)
                 {
                     Destroy(this.gameObject);
                 }
@@ -125,22 +152,26 @@ public class babyBehavior : MonoBehaviour
             }
             else if (target.GetComponent<InteractionBehavior>().interactionType == InteractionType.Vent)
             {
+                window = target.transform.Find("Window").transform;
+
                 //kill tous les babies de la pièce
                 GameObject[] babies = GameObject.FindGameObjectsWithTag("Baby");
-                
+
                 foreach (GameObject baby in babies)
                 {
-                    if (baby.GetComponent<babyBehavior>().currentRoom == currentRoom)
+                    var babyBehav = baby.GetComponent<babyBehavior>();
+                    if (babyBehav.currentRoom == currentRoom)
                     {
-                        //Destroy(baby);
+                        //start flying in space
+                        babyBehav.babyState = BabyState.FLying;
+                        babyBehav.window = window;
+                        babyBehav.flyDirection = Vector3.Normalize(window.position - babyBehav.transform.position);
+                        babyBehav.isAccelerating = true;
 
-                        babyState = BabyState.FLying;
-
-                        flyingDirection = Vector3.Normalize(target.transform.position - transform.position);
-                        target = null;
-                        GetComponent<AIDestinationSetter>().target = null;
-
-                        GetComponent<AIPath>().maxSpeed = 0f;
+                        //stop pathfinding
+                        babyBehav.target = null;
+                        baby.GetComponent<AIDestinationSetter>().target = null;
+                        baby.GetComponent<AIPath>().maxSpeed = 0f;
                     }
                 }
             }
