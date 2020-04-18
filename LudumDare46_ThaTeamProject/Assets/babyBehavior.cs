@@ -6,7 +6,7 @@ using Pathfinding;
 public class babyBehavior : MonoBehaviour
 {
 
-    public interactionManager intManager;
+    interactionManager intManager;
     GameObject target;
 
     enum BabyState { Idle, Walking, Interacting, Dead };
@@ -15,6 +15,7 @@ public class babyBehavior : MonoBehaviour
 
     void Start()
     {
+        intManager = GameObject.Find("InteractionManager").GetComponent<interactionManager>();
         target = intManager.interactionPoints[Random.Range(0, intManager.interactionPoints.Length)];
         GetComponent<AIDestinationSetter>().target = target.transform;
         babyState = BabyState.Walking;
@@ -28,15 +29,15 @@ public class babyBehavior : MonoBehaviour
         {
             if (Vector3.Distance(GetComponent<AIDestinationSetter>().target.position, transform.position) < 0.1f)
             {
-                if (target.GetComponent<InteractionBehavior>().interactionType == InteractionType.Idle ||
-                    target.GetComponent<InteractionBehavior>().interactionType == InteractionType.Clone )
+                if (target.GetComponent<InteractionBehavior>().interactionType == InteractionType.Idle)
                 {
                     babyState = BabyState.Idle;
                 }
                 else if (target.GetComponent<InteractionBehavior>().interactionType == InteractionType.Kill ||
                          target.GetComponent<InteractionBehavior>().interactionType == InteractionType.Fire ||
                          target.GetComponent<InteractionBehavior>().interactionType == InteractionType.KillFire ||
-                         target.GetComponent<InteractionBehavior>().interactionType == InteractionType.Vent )
+                         target.GetComponent<InteractionBehavior>().interactionType == InteractionType.Vent ||
+                         target.GetComponent<InteractionBehavior>().interactionType == InteractionType.Clone )
                 {
                     babyState = BabyState.Interacting;
                 }
@@ -54,7 +55,8 @@ public class babyBehavior : MonoBehaviour
         {
             if (GetComponent<PolygonCollider2D>().OverlapPoint(Camera.main.ScreenToWorldPoint(Input.mousePosition)))
             {
-                if (babyState == BabyState.Interacting)
+                //stop if interacting except clone
+                if (babyState == BabyState.Interacting && target.GetComponent<InteractionBehavior>().interactionType != InteractionType.Clone)
                 {
                     print("Arrête ça " + this.name + " !");
 
@@ -72,8 +74,30 @@ public class babyBehavior : MonoBehaviour
 
         if (babyState == BabyState.Interacting)
         {
-            Destroy(gameObject);
-            print("interaction " + target.GetComponent<InteractionBehavior>().interactionType + " terminée");
+            if (target.GetComponent<InteractionBehavior>().interactionType == InteractionType.Clone)
+            {
+                print("new BABYYYYYYYYY");
+                Instantiate(intManager.babyPrefab, transform.position, transform.rotation);
+            }
+            else if (target.GetComponent<InteractionBehavior>().interactionType == InteractionType.Kill)
+            {
+                Destroy(gameObject);
+            }
+            else if (target.GetComponent<InteractionBehavior>().interactionType == InteractionType.Vent)
+            {
+                //foreach baby in room
+                    //Destroy(gameObject);
+            }
+            else if (target.GetComponent<InteractionBehavior>().interactionType == InteractionType.Fire)
+            {
+                //Room on fire
+            }
+            else if (target.GetComponent<InteractionBehavior>().interactionType == InteractionType.KillFire)
+            {
+                Destroy(gameObject);
+                //Room on fire
+            }
+            //print("interaction " + target.GetComponent<InteractionBehavior>().interactionType + " terminée");
         }
         
         //si bébé n'est pas déjà reparti en vadrouille (interaction interupt)

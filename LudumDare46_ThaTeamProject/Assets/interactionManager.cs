@@ -7,6 +7,7 @@ public enum InteractionType { Idle, Vent, Kill, Fire, KillFire, Autodestruct, Cl
 public class interactionManager : MonoBehaviour
 {
     public GameObject[] interactionPoints;
+    public GameObject babyPrefab;
 
 
     void Start()
