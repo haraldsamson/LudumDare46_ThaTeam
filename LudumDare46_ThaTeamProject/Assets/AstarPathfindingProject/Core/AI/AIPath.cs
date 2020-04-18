@@ -269,12 +269,12 @@ namespace Pathfinding {
 		/// </summary>
 		public virtual void OnTargetReached () {
 		}
-
 		/// <summary>
 		/// Called when a requested path has been calculated.
 		/// A path is first requested by <see cref="UpdatePath"/>, it is then calculated, probably in the same or the next frame.
 		/// Finally it is returned to the seeker which forwards it to this function.
 		/// </summary>
+
 		protected override void OnPathComplete (Path newPath) {
 			ABPath p = newPath as ABPath;
 
@@ -326,6 +326,7 @@ namespace Pathfinding {
 			if (distanceToEnd <= endReachedDistance) {
 				reachedEndOfPath = true;
 				OnTargetReached();
+				//print("OnTargetReached ..........................");
 			}
 		}
 
