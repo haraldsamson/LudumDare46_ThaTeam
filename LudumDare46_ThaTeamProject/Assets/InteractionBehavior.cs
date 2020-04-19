@@ -7,7 +7,10 @@ public class InteractionBehavior : MonoBehaviour
 
     public float interactionTime;
 
+    public GameObject room;
+
     public InteractionType interactionType;
+
 
         // Start is called before the first frame update
     void Start()
@@ -18,6 +21,7 @@ public class InteractionBehavior : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        
+
     }
+
 }

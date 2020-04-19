@@ -100,10 +100,14 @@ public class babyBehavior : MonoBehaviour
                         else if (target.GetComponent<InteractionBehavior>().interactionType == InteractionType.Kill ||
                                  target.GetComponent<InteractionBehavior>().interactionType == InteractionType.Fire ||
                                  target.GetComponent<InteractionBehavior>().interactionType == InteractionType.KillFire ||
-                                 target.GetComponent<InteractionBehavior>().interactionType == InteractionType.Vent ||
                                  target.GetComponent<InteractionBehavior>().interactionType == InteractionType.Clone)
                         {
                             babyState = BabyState.Interacting;
+                        }
+                        else if (target.GetComponent<InteractionBehavior>().interactionType == InteractionType.Vent)
+                        {
+                            babyState = BabyState.Interacting;
+                            target.GetComponent<InteractionBehavior>().room.GetComponent<RoomBehavior>().TurnOnRedLight();
                         }
 
                         //print("target reached");
@@ -123,6 +127,11 @@ public class babyBehavior : MonoBehaviour
                         if (babyState == BabyState.Interacting && target.GetComponent<InteractionBehavior>().interactionType != InteractionType.Clone)
                         {
                             print("Arrête ça " + this.name + " !");
+
+                            if (target.GetComponent<InteractionBehavior>().interactionType == InteractionType.Vent)
+                            {
+                                target.GetComponent<InteractionBehavior>().room.GetComponent<RoomBehavior>().TurnOffRedLight();
+                            }
 
                             FindNewTarget();
                         }
@@ -153,6 +162,8 @@ public class babyBehavior : MonoBehaviour
             else if (target.GetComponent<InteractionBehavior>().interactionType == InteractionType.Vent)
             {
                 window = target.transform.Find("Window").transform;
+
+                target.GetComponent<InteractionBehavior>().room.GetComponent<RoomBehavior>().TurnOffRedLight();
 
                 //kill tous les babies de la pièce
                 GameObject[] babies = GameObject.FindGameObjectsWithTag("Baby");
