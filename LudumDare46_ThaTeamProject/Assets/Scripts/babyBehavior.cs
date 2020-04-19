@@ -48,11 +48,18 @@ public class babyBehavior : MonoBehaviour
                 //print(hit.transform.parent.gameObject.name);
             }
         }
-
-        if (currentRoom.GetComponent<RoomBehavior>() != null)
+        else
         {
-            if (currentRoom.GetComponent<RoomBehavior>().isBigFire)
-                Destroy(this.gameObject);
+            currentRoom = null;
+        }
+
+        if (currentRoom != null)
+        {
+            if (currentRoom.GetComponent<RoomBehavior>() != null)
+            {
+                if (currentRoom.GetComponent<RoomBehavior>().isBigFire)
+                    Destroy(this.gameObject);
+            }
         }
 
         //print("currentRoom is " + currentRoom);

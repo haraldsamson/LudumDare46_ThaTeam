@@ -8,25 +8,34 @@ public class RoomBehavior : MonoBehaviour
     public Light[] lights;
     public Light redLight;
 
+    GameObject floor;
+
     bool isLightRotating = false;
     float rotationSpeed = 370f;
 
-    bool isSmallFire = false;
+    public bool isSmallFire = false;
     public bool isBigFire = false;
 
     public GameObject[] smallFire;
     public GameObject[] bigFire;
 
+    public float flameLevel = 0f;
+
     float fireExpendTime = 2f;
-    float firePropagMinTime = 2f;
-    float firePropagMaxTime = 4f;
+    float firePropagTime = 2f;
 
     public GameObject[] sideRoom;
 
     // Start is called before the first frame update
     void Start()
     {
-        
+        foreach (Transform eachChild in transform)
+        {
+            if (eachChild.name == "Floor")
+            {
+                floor = eachChild.gameObject;
+            }
+        }
     }
 
     // Update is called once per frame
@@ -36,6 +45,38 @@ public class RoomBehavior : MonoBehaviour
         {
             redLight.gameObject.transform.Rotate(Vector3.right, rotationSpeed * Time.deltaTime, Space.World);
         }
+
+        if (isSmallFire)
+        {
+            flameLevel += Time.deltaTime / fireExpendTime;
+
+            if (flameLevel >= 1f)
+            {
+                FireBigStart();
+                isSmallFire = false;
+            }
+            else if (flameLevel <= 0f)
+            {
+                FireSmallStop();
+            }
+        }
+
+        if (isBigFire)
+        {
+            flameLevel = Mathf.Min(flameLevel + Time.deltaTime / firePropagTime, 2f);
+
+            if (flameLevel >= 2f)
+            {
+                FirePropagate();
+                flameLevel = 1f;
+            }
+            else if (flameLevel <= 0f)
+            {
+                FireBigStop();
+            }
+        }
+
+
     }
 
     public void FireSmallStart()
@@ -46,13 +87,12 @@ public class RoomBehavior : MonoBehaviour
         {
             sFire.SetActive(true);
         }
-
-        StartCoroutine(FireBigStart(fireExpendTime));
     }
 
     public void FireSmallStop()
     {
         isSmallFire = false;
+        flameLevel = 0;
 
         foreach (GameObject sFire in smallFire)
         {
@@ -60,28 +100,22 @@ public class RoomBehavior : MonoBehaviour
         }
     }
 
-    IEnumerator FireBigStart(float time)
+    void FireBigStart()
     {
-        yield return new WaitForSeconds(time);
+        isBigFire = true;
 
-        if (isSmallFire == true)
+        foreach (GameObject bFire in bigFire)
         {
-            isBigFire = true;
-
-            foreach (GameObject bFire in bigFire)
-            {
-                bFire.SetActive(true);
-            }
-
-            StartCoroutine(FirePropagate(Random.Range(firePropagMinTime, firePropagMaxTime)));
-
-            TurnOnRedLight();
+            bFire.SetActive(true);
         }
+
+        TurnOnRedLight();
     }
 
     public void FireBigStop()
     {
         isBigFire = false;
+        flameLevel = 0;
 
         foreach (GameObject bFire in bigFire)
         {
@@ -93,17 +127,12 @@ public class RoomBehavior : MonoBehaviour
         TurnOffRedLight();
     }
 
-    IEnumerator FirePropagate(float time)
+    void FirePropagate()
     {
-        yield return new WaitForSeconds(time);
-
-        if (isBigFire)
+        foreach (GameObject room in sideRoom)
         {
-            foreach (GameObject room in sideRoom)
-            {
-                if(room.GetComponent<RoomBehavior>().isSmallFire == false && room.GetComponent<RoomBehavior>().isBigFire == false)
-                    room.GetComponent<RoomBehavior>().FireSmallStart();
-            }
+            if(room.GetComponent<RoomBehavior>().isSmallFire == false && room.GetComponent<RoomBehavior>().isBigFire == false)
+                room.GetComponent<RoomBehavior>().FireSmallStart();
         }
     }
 
