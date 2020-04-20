@@ -15,6 +15,7 @@ public class interactionManager : MonoBehaviour
         foreach (Transform child in transform)
         {
             interactionPoints.Add(child.gameObject);
+            child.GetComponentInChildren<SpriteRenderer>().gameObject.SetActive(false);
         }
         print("there is " + interactionPoints.Count + " interactionPoints");
     }

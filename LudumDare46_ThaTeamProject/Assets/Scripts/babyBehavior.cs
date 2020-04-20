@@ -133,7 +133,7 @@ public class babyBehavior : MonoBehaviour
 
                 if (Input.GetMouseButtonDown(0))
                 {
-                    if (GetComponent<PolygonCollider2D>().OverlapPoint(Camera.main.ScreenToWorldPoint(Input.mousePosition)))
+                    if (GetComponent<CircleCollider2D>().OverlapPoint(Camera.main.ScreenToWorldPoint(Input.mousePosition)))
                     {
                         //stop if interacting except clone
                         if (babyState == BabyState.Interacting && target.GetComponent<InteractionBehavior>().interactionType != InteractionType.Clone)

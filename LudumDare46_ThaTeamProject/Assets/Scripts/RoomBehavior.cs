@@ -23,8 +23,8 @@ public class RoomBehavior : MonoBehaviour
 
     public float flameLevel = 0f;
 
-    float fireExpendTime = 2f;
-    float firePropagTime = 2f;
+    float fireExpendTime = 5f;
+    float firePropagTime = 3f;
 
     public GameObject[] sideRoom;
 
