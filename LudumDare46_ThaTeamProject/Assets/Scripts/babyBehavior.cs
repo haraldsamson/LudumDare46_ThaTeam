@@ -28,9 +28,8 @@ public class babyBehavior : MonoBehaviour
     void Start()
     {
         intManager = GameObject.Find("InteractionManager").GetComponent<interactionManager>();
-        target = intManager.interactionPoints[Random.Range(0, intManager.interactionPoints.Count)];
-        GetComponent<AIDestinationSetter>().target = target.transform;
-        babyState = BabyState.Walking;
+
+        FindNewTarget();
 
         //update "opti" tous les 0.1s
         InvokeRepeating("Update01", Random.Range(0f,0.1f), 0.1f);
@@ -232,7 +231,7 @@ public class babyBehavior : MonoBehaviour
         babyState = BabyState.Walking;
 
         //tirer une target random (autre que celle ou le bébé est déjà)
-        while (Vector3.Distance(GetComponent<AIDestinationSetter>().target.position, transform.position) < 0.15f || Vector3.Distance(GetComponent<AIDestinationSetter>().target.position, transform.position) > 0.9f)
+        while (Vector3.Distance(GetComponent<AIDestinationSetter>().target.position, transform.position) < 0.15f || Vector3.Distance(GetComponent<AIDestinationSetter>().target.position, transform.position) > 4f)
         {
             target = intManager.interactionPoints[Random.Range(0, intManager.interactionPoints.Count)];
             GetComponent<AIDestinationSetter>().target = target.transform;

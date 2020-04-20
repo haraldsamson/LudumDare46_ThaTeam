@@ -8,11 +8,11 @@ public class HealthBar : MonoBehaviour
     public Transform ship;
     float hp;
     public float shakeDuration = 0.7f;
-    public float shakeScale = 0.3f;
-    public GameObject gameOverScreen;
+    public float shakeScale = 1f;
     public GameObject explosionPrefab;
     public SpriteRenderer barSprite;
-    Bounds shipBounds;
+
+    public GameObject gameOverMenuUI;
 
     // Start is called before the first frame update
     void Start()
@@ -20,8 +20,6 @@ public class HealthBar : MonoBehaviour
         bar = transform.Find("Bar");
         hp = 100f;
         bar.localScale = new Vector3(hp / 100f, 1f);
-
-        shipBounds = ship.GetComponent<PolygonCollider2D>().bounds;
     }
 
     public void HPChange(float hpVar,Bounds roomFloor)
@@ -43,10 +41,6 @@ public class HealthBar : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        if (Input.GetKeyDown(KeyCode.Space))
-        {
-            StartCoroutine("ShakeCamera");
-        }
 
     }
 
@@ -108,12 +102,12 @@ public class HealthBar : MonoBehaviour
 
         InvokeRepeating("ShipExplosion", 0f, 0.3f);
 
-        for (float t = 0.0f; t < 3f; t += Time.deltaTime)
+        for (float t = 0.0f; t < 4f; t += Time.deltaTime)
         {
             intensity = Mathf.Clamp(intensity + Time.deltaTime * 3f, 0f, 1f); 
 
             // Create a temporary vector2 with the ship's original position modified by a random distance from the origin.
-            origPos -= new Vector3(Time.deltaTime * 2.5f, 0f, 0f);
+            origPos -= new Vector3(Time.deltaTime * 8f, 0f, 0f);
             Vector3 tempVec = origPos + Random.insideUnitSphere * shakeScale * intensity;
 
             // Apply the temporary vector.
@@ -130,7 +124,7 @@ public class HealthBar : MonoBehaviour
             intensity = Mathf.Clamp(intensity - Time.deltaTime * 0.6f, 0f, 1f);
 
             // Apply the temporary vector.
-            origPos -= new Vector3(Time.deltaTime * 2.5f, 0f, 0f);
+            origPos -= new Vector3(Time.deltaTime * 8f, 0f, 0f);
             Vector3 tempVec = origPos + Random.insideUnitSphere * shakeScale * intensity;
 
             ship.position = tempVec;
@@ -142,17 +136,22 @@ public class HealthBar : MonoBehaviour
         }
 
         CancelInvoke();
-
-
         // display final GAMEOVER screenn
-        gameOverScreen.SetActive(true);
+        gameOverMenuUI.SetActive(true);
+
+        foreach (Transform chil in transform)
+        {
+            chil.gameObject.SetActive(false);
+        }
+
+        Time.timeScale = 0f;
 
     }
 
     void ShipExplosion()
     {
         //1 chance sur 3 pour casser le rythme
-        if (Random.Range(0, 3) == 0)
+        if (Random.Range(0, 4) == 0)
         {
             Explosion(ship.gameObject.GetComponent<PolygonCollider2D>().bounds);
         }

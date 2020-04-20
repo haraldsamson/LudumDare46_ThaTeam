@@ -6,7 +6,7 @@ public enum InteractionType { Idle, Vent, Kill, Fire, KillFire, Autodestruct, Cl
 
 public class interactionManager : MonoBehaviour
 {
-    [HideInInspector] public List<GameObject> interactionPoints = new List<GameObject>();
+    public List<GameObject> interactionPoints = new List<GameObject>();
     public GameObject babyPrefab;
     public HealthBar healthBar;
 
