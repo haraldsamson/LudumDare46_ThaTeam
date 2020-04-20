@@ -178,6 +178,9 @@ public class babyBehavior : MonoBehaviour
 
                 target.GetComponent<InteractionBehavior>().room.GetComponent<RoomBehavior>().TurnOffRedLight();
 
+                //perd hp
+                intManager.healthBar.HPChange(-10f,currentRoom.transform.Find("Floor").GetComponent<BoxCollider2D>().bounds);
+
                 //kill tous les babies de la pièce
                 GameObject[] babies = GameObject.FindGameObjectsWithTag("Baby");
 

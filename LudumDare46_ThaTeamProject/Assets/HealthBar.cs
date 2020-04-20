@@ -7,10 +7,11 @@ public class HealthBar : MonoBehaviour
     Transform bar;
     public Transform ship;
     float hp;
-    public float shakeDuration = 0.5f;
+    public float shakeDuration = 0.7f;
     public float shakeScale = 0.3f;
     public GameObject gameOverScreen;
     public GameObject explosionPrefab;
+    public SpriteRenderer barSprite;
     Bounds shipBounds;
 
     // Start is called before the first frame update
@@ -23,10 +24,14 @@ public class HealthBar : MonoBehaviour
         shipBounds = ship.GetComponent<PolygonCollider2D>().bounds;
     }
 
-    public void HPChange(float hpVar)
+    public void HPChange(float hpVar,Bounds roomFloor)
     {
         hp = Mathf.Clamp(hp+hpVar, 0f,100f);
         bar.localScale = new Vector3(hp/100f, 1f);
+
+        StartCoroutine("HpBarFlicker");
+        StartCoroutine("ShakeCamera");
+        Explosion(roomFloor);
 
         if (hp <= 0f)
         {
@@ -43,6 +48,36 @@ public class HealthBar : MonoBehaviour
             StartCoroutine("ShakeCamera");
         }
 
+    }
+
+    IEnumerator HpBarFlicker()
+    {
+        float delta = 0.1f;
+        float deltaSum = 0.1f;
+        bool isWhite = false;
+
+        for (float t = 0.0f; t < shakeDuration; t += Time.deltaTime)
+        {
+            if (t > deltaSum)
+            {
+                if (isWhite)
+                {
+                    barSprite.color = new Color(1f, 0f, 0f);
+                    isWhite = false;
+                }
+                else
+                {
+                    barSprite.color = new Color(1f, 1f, 1f);
+                    isWhite = true;
+                }
+                deltaSum += delta;
+            }
+            
+            yield return null;
+        }
+
+        // Return back to the original color.
+        barSprite.color = new Color(1f, 0f, 0f);
     }
 
     IEnumerator ShakeCamera()
@@ -71,7 +106,7 @@ public class HealthBar : MonoBehaviour
         Vector3 origPos = ship.position;
         float intensity = 0f;
 
-        InvokeRepeating("Explosion", 0f, 0.3f);
+        InvokeRepeating("ShipExplosion", 0f, 0.3f);
 
         for (float t = 0.0f; t < 3f; t += Time.deltaTime)
         {
@@ -108,23 +143,32 @@ public class HealthBar : MonoBehaviour
 
         CancelInvoke();
 
+
         // display final GAMEOVER screenn
         gameOverScreen.SetActive(true);
 
     }
 
-    void Explosion()
+    void ShipExplosion()
     {
-        shipBounds = ship.GetComponent<PolygonCollider2D>().bounds;
         //1 chance sur 3 pour casser le rythme
-        if (Random.Range(0,3) == 0)
+        if (Random.Range(0, 3) == 0)
         {
-            Vector3 randPos = new Vector3(
-                Random.Range(shipBounds.min.x, shipBounds.max.x),
-                Random.Range(shipBounds.min.y, shipBounds.max.y),
-                Random.Range(shipBounds.min.z, shipBounds.max.z));
-
-            Instantiate(explosionPrefab, randPos, Quaternion.identity);
+            Explosion(ship.gameObject.GetComponent<PolygonCollider2D>().bounds);
         }
     }
+
+    void Explosion(Bounds bounds)
+    {
+        GameObject explo;
+
+        Vector3 randPos = new Vector3(
+            Random.Range(bounds.min.x, bounds.max.x),
+            Random.Range(bounds.min.y, bounds.max.y),
+            Random.Range(bounds.min.z, bounds.max.z));
+
+        explo = Instantiate(explosionPrefab, randPos, Quaternion.identity);
+        Destroy(explo, 0.8f);
+} 
+
 }

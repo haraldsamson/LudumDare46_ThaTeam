@@ -8,6 +8,8 @@ public class RoomBehavior : MonoBehaviour
     public Light[] lights;
     public Light redLight;
 
+    interactionManager intManager;
+
     GameObject floor;
 
     bool isLightRotating = false;
@@ -29,6 +31,7 @@ public class RoomBehavior : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
+        intManager = GameObject.Find("InteractionManager").GetComponent<interactionManager>();
         foreach (Transform eachChild in transform)
         {
             if (eachChild.name == "Floor")
@@ -54,6 +57,9 @@ public class RoomBehavior : MonoBehaviour
             {
                 FireBigStart();
                 isSmallFire = false;
+
+                //perd hp
+                intManager.healthBar.HPChange(-5f, transform.Find("Floor").GetComponent<BoxCollider2D>().bounds);
             }
             else if (flameLevel <= 0f)
             {
@@ -69,6 +75,9 @@ public class RoomBehavior : MonoBehaviour
             {
                 FirePropagate();
                 flameLevel = 1f;
+
+                //perd hp
+                intManager.healthBar.HPChange(-5f, transform.Find("Floor").GetComponent<BoxCollider2D>().bounds);
             }
             else if (flameLevel <= 0f)
             {
