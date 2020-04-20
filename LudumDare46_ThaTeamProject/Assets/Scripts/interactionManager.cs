@@ -6,18 +6,30 @@ public enum InteractionType { Idle, Vent, Kill, Fire, KillFire, Autodestruct, Cl
 
 public class interactionManager : MonoBehaviour
 {
-    public GameObject[] interactionPoints;
+    [HideInInspector] public List<GameObject> interactionPoints = new List<GameObject>();
     public GameObject babyPrefab;
+    public HealthBar healthBar;
 
+    private void Awake()
+    {
+        foreach (Transform child in transform)
+        {
+            interactionPoints.Add(child.gameObject);
+        }
+        print("there is " + interactionPoints.Count + " interactionPoints");
+    }
 
     void Start()
     {
-        
+
     }
 
     // Update is called once per frame
     void Update()
     {
-        
+        if (Input.GetKeyDown(KeyCode.A))
+        {
+            healthBar.HPChange(-20f);
+        }
     }
 }
